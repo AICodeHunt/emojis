@@ -1,13 +1,10 @@
-import { PROD_URL } from "@/lib/constants"
+import { APP_STORE_URL, PROD_URL } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import { getEmojis } from "@/server/get-emojis"
 import { Github } from "lucide-react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import Image from "next/image"
 import Link from "next/link"
-import { Suspense } from "react"
-import { EmojiCard } from "./_components/emoji-card"
-import { EmojiCount } from "./_components/emoji-count"
 import { Providers } from "./_components/providers"
 import "./globals.css"
 
@@ -29,6 +26,7 @@ import "./globals.css"
  * @see https://nextjs.org/docs/app/building-your-application/rendering/server-components#dynamic-rendering
  */
 export const dynamic = "force-dynamic"
+export const runtime = "edge"
 
 const BODY_PADDING = "px-4 sm:px-6"
 
@@ -42,11 +40,15 @@ export function generateMetadata(): Metadata {
     metadataBase: new URL(PROD_URL),
     title,
     description,
+    applicationName: "AI Emojis",
+    other: {
+      "apple-itunes-app": "app-id=6468916301",
+    },
     openGraph: {
       title,
       description,
       url: PROD_URL,
-      siteName: "emojis.alexandru.so",
+      siteName: "emojis.sh",
       locale: "en_US",
       type: "website",
     },
@@ -91,49 +93,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span>emojis</span>
           </Link>
 
-          <Link
-            href="https://github.com/pondorasti/emojis"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center"
-          >
-            <span className="sr-only">Github Repository</span>
-            <Github size={20} />
-          </Link>
+          <div className="flex flex-row flex-nowrap gap-x-1.5 items-center">
+            <Link href="/app?referrer=website" target="_blank" rel="noopener noreferrer">
+              <span className="sr-only">Download App</span>
+              <Image
+                src="/_static/AppStoreBadge.svg"
+                alt="App Store Badge"
+                width={120}
+                height={40}
+                priority
+                className="h-8"
+              />
+            </Link>
+            <Link
+              href="https://github.com/pondorasti/emojis"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center"
+            >
+              <span className="sr-only">Github Repository</span>
+              <Github size={20} />
+            </Link>
+          </div>
         </header>
         <main className={cn("min-h-screen flex items-stretch flex-col pb-28 max-w-5xl mx-auto", BODY_PADDING)}>
-          <div className="py-[15vh] sm:py-[20vh] flex flex-col items-center justify-center">
-            <h1 className="font-medium text-4xl text-black mb-3 animate-in fade-in slide-in-from-bottom-3 duration-1000 ease-in-out">
-              AI Emojis
-            </h1>
-            <EmojiCount />
-
-            <div className="max-w-md space-y-4 w-full animate-in fade-in slide-in-from-bottom-4 duration-1200 ease-in-out">
-              {children}
-            </div>
-          </div>
-
-          <Suspense>
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-1200 ease-in-out">
-              <h2 className="font-semibold text-md text-left w-full mb-3">Recents</h2>
-              <EmojiGrid />
-            </div>
-          </Suspense>
+          {children}
         </main>
         <Providers />
       </body>
     </html>
-  )
-}
-
-async function EmojiGrid() {
-  const emojis = await getEmojis()
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 justify-items-stretch w-full">
-      {emojis.map((emoji) => (
-        <EmojiCard key={emoji.id} id={emoji.id} />
-      ))}
-    </div>
   )
 }

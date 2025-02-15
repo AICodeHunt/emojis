@@ -35,7 +35,7 @@ export class Response {
 }
 
 export const webhookSchema = z.object({
-  id: z.string().length(7),
+  id: z.string().length(7).or(z.string().length(10)),
   secret: z.string().refine((data) => data === process.env.API_SECRET, {
     message: "Invalid secret",
   }),
@@ -47,3 +47,9 @@ export const emojiContextSchema = z.object({
   }),
 })
 export type EmojiContextProps = z.infer<typeof emojiContextSchema>
+
+export const VALID_EMOJI_FILTER = {
+  isFlagged: false,
+  originalUrl: { not: null },
+  noBackgroundUrl: { not: null },
+}
